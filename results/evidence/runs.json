@@ -1,0 +1,37 @@
+{
+  "dpo": {
+    "base_model": "outputs/sft_merged",
+    "duration_seconds": 324.72,
+    "trainer_global_step": 60,
+    "log_rows": 18
+  },
+  "grpo": {
+    "base_model": "outputs/math_sft_merged",
+    "duration_seconds": 253.156,
+    "trainer_global_step": 30,
+    "log_rows": 31
+  },
+  "math_sft": {
+    "base_model": "Qwen/Qwen2.5-0.5B",
+    "duration_seconds": 210.97,
+    "trainer_global_step": 80,
+    "log_rows": 22
+  },
+  "ppo": {
+    "base_model": "outputs/sft_merged",
+    "duration_seconds": 214.973,
+    "log_rows": 30
+  },
+  "reward_model": {
+    "base_model": "outputs/sft_merged",
+    "duration_seconds": 98.755,
+    "trainer_global_step": 60,
+    "log_rows": 18
+  },
+  "sft": {
+    "base_model": "Qwen/Qwen2.5-0.5B",
+    "duration_seconds": 173.019,
+    "trainer_global_step": 80,
+    "log_rows": 22
+  }
+}

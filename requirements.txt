@@ -1,0 +1,16 @@
+# Install matching PyTorch first: CUDA or AMD ROCm; never pip-install torch blindly here.
+transformers==4.57.3
+trl==0.26.2
+peft==0.18.0
+accelerate==1.12.0
+datasets==4.4.1
+safetensors>=0.5.3
+sentencepiece>=0.2.0
+protobuf>=4.25
+scipy>=1.11
+numpy>=1.26
+pytest>=8.0
+# 训练过程可视化
+matplotlib>=3.8,<4
+tensorboard>=2.17,<3
+psutil>=5.9
