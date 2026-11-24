@@ -2,7 +2,7 @@
 
 [中文说明](README_zh.md) · [Experiment report](docs/experiment_report.md) · [Implementation audit](docs/audit.md)
 
-A single-GPU study of preference alignment and verifiable math rewards on Qwen2.5-0.5B. The strongest observed change came from supervised math demonstrations. On the same 200 GSM8K questions, GRPO subsequently gained seven correct answers and lost six.
+A single-GPU study of preference alignment and verifiable math rewards on Qwen2.5-0.5B. The strongest observed change came from supervised math demonstrations. On the same 200 GSM8K questions, the original G=2 GRPO run gained seven correct answers and lost six.
 
 ```mermaid
 flowchart LR
@@ -23,6 +23,10 @@ flowchart LR
 | PPO | 25/51 | N/A |
 | Math SFT | N/A | 58/200 |
 | GRPO | N/A | 59/200 |
+
+**GRPO sampling ablation.** Each run generated 120 training answers in 30 steps. Increasing completions per question from 2 to 4 raised the fraction of groups with nonconstant rewards from 28.33% to 60.00%. The number of informative groups increased from **17/60 to 18/30**. Both checkpoints scored **59/200** under greedy decoding. Compared question by question, G=4 gained seven answers and lost seven relative to G=2.
+
+![GRPO sampling comparison](results/figures/grpo_g2_g4.png)
 
 ![GSM8K comparison](results/figures/gsm8k.png)
 
@@ -47,9 +51,11 @@ python -m scripts.train_dpo --steps 60
 python -m scripts.train_ppo --steps 30 --max-new 64
 python -m scripts.train_math_sft --steps 80
 python -m scripts.merge_adapter --adapter outputs/math_sft_adapter --out outputs/math_sft_merged
-python -m scripts.train_grpo --steps 30 --max-new 64
+python -m scripts.train_grpo --steps 30 --max-new 64 --seed 42 --num-generations 2 --out outputs/grpo_g2
+python -m scripts.train_grpo --steps 30 --max-new 64 --seed 42 --num-generations 4 --out outputs/grpo_g4
 python -m scripts.evaluate_preference --model outputs/sft_merged --adapter outputs/dpo_adapter --limit 51 --out results/new_dpo.json
-python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_adapter --limit 200 --max-new 128 --out results/new_grpo.json
+python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_g2 --limit 200 --max-new 128 --out results/new_grpo_g2.json
+python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_g4 --limit 200 --max-new 128 --out results/new_grpo_g4.json
 python -m scripts.plot_summary
 python -m pytest -q
 ```

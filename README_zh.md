@@ -24,6 +24,10 @@ flowchart LR
 |Math SFT|N/A|58/200|
 |GRPO|N/A|59/200|
 
+**GRPO 采样数消融。** 两组均训练 30 步、生成 120 个回答。每题采样数从 2 增至 4 后，奖励存在组内差异的比例从 28.33% 升至 60.00%，有效组数从 **17/60 变为 18/30**。两次严格评估均为 **59/200**。按题号配对，G=4 相对 G=2 新答对 7 题，同时丢失 7 题。
+
+![GRPO sampling comparison](results/figures/grpo_g2_g4.png)
+
 ![数学分支](results/figures/gsm8k.png)
 
 偏好数据由 512 对 UltraFeedback 拆分得到，评估时比较候选回答平均 token 对数似然。PPO、DPO、SFT 逐对排序相同。检查保存张量发现 PPO 策略低秩增量为零，现已增加梯度检查，修订版本尚待训练验证。数学训练与验证共取 GSM8K train 的 1,024 题；测试取官方 test 前 200 题，使用 greedy 和 128 token 上限。Math SFT 净增 55 题，GRPO 再净增 1 题。Base 有 195 个输出缺少可提取答案，结果包含格式学习的贡献。
@@ -43,9 +47,11 @@ python -m scripts.train_dpo --steps 60
 python -m scripts.train_ppo --steps 30 --max-new 64
 python -m scripts.train_math_sft --steps 80
 python -m scripts.merge_adapter --adapter outputs/math_sft_adapter --out outputs/math_sft_merged
-python -m scripts.train_grpo --steps 30 --max-new 64
+python -m scripts.train_grpo --steps 30 --max-new 64 --seed 42 --num-generations 2 --out outputs/grpo_g2
+python -m scripts.train_grpo --steps 30 --max-new 64 --seed 42 --num-generations 4 --out outputs/grpo_g4
 python -m scripts.evaluate_preference --model outputs/sft_merged --adapter outputs/dpo_adapter --limit 51 --out results/new_dpo.json
-python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_adapter --limit 200 --max-new 128 --out results/new_grpo.json
+python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_g2 --limit 200 --max-new 128 --out results/new_grpo_g2.json
+python -m scripts.evaluate --model outputs/math_sft_merged --adapter outputs/grpo_g4 --limit 200 --max-new 128 --out results/new_grpo_g4.json
 python -m scripts.plot_summary
 python -m pytest -q
 ```
